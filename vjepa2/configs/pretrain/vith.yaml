@@ -5,8 +5,8 @@ data:
   train_optimized_dir: 's3://your-bucket/opt_videos'
   cache_dir: "./output/cache"
   subset_ratio: null
-  normalize_mean: [0.485, 0.456, 0.406]
-  normalize_std: [0.229, 0.224, 0.225]
+  normalize_mean: [0.117, 0.114, 0.113]
+  normalize_std: [0.208, 0.204, 0.203]
   max_cache_size: '100GB'
   cloud_type: 's3_public'
   dataset_fpcs: [16]

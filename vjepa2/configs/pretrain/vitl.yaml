@@ -2,15 +2,15 @@
 # PyTorch Lightning + schedule-free optimizer
 
 data:
-  train_optimized_dir: 's3://your-bucket/opt_videos'
+  train_optimized_dir: 's3://tee-2023-2024/opt_mp4-2014-2023'
   cache_dir: "./output/cache"
-  subset_ratio: null
-  normalize_mean: [0.485, 0.456, 0.406]
-  normalize_std: [0.229, 0.224, 0.225]
+  subset_ratio: 0.01
+  normalize_mean: [0.117, 0.114, 0.113]
+  normalize_std: [0.208, 0.204, 0.203]
   max_cache_size: '100GB'
   cloud_type: 's3_public'
   dataset_fpcs: [16]
-  crop_size: 256
+  crop_size: 224
   patch_size: 16
   tubelet_size: 2
   frames_to_sample: 16
