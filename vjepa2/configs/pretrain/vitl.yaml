@@ -1,0 +1,98 @@
+# V-JEPA Pretraining Configuration (ViT-L) with LitData optimized dataset
+# PyTorch Lightning + schedule-free optimizer
+
+data:
+  train_optimized_dir: 's3://your-bucket/opt_videos'
+  cache_dir: "./output/cache"
+  subset_ratio: null
+  normalize_mean: [0.485, 0.456, 0.406]
+  normalize_std: [0.229, 0.224, 0.225]
+  max_cache_size: '100GB'
+  cloud_type: 's3_public'
+  dataset_fpcs: [16]
+  crop_size: 256
+  patch_size: 16
+  tubelet_size: 2
+  frames_to_sample: 16
+  temporal_stride: 1
+
+data_aug:
+  auto_augment: false
+  motion_shift: false
+  random_resize_aspect_ratio: [0.75, 1.35]
+  random_resize_scale: [0.3, 1.0]
+  reprob: 0.0
+
+model:
+  model_name: vit_large
+  pred_depth: 12
+  pred_embed_dim: 384
+  pred_num_heads: 12
+  uniform_power: true
+  use_activation_checkpointing: true
+  use_mask_tokens: true
+  use_rope: true
+  use_silu: false
+  use_pred_silu: false
+  wide_silu: true
+  zero_init_mask_tokens: true
+  use_sdpa: true
+  crop_size: 256
+  patch_size: 16
+
+mask:
+  - aspect_ratio: [0.75, 1.5]
+    full_complement: false
+    max_keep: null
+    max_temporal_keep: 1.0
+    num_blocks: 8
+    spatial_scale: [0.15, 0.15]
+    temporal_scale: [1.0, 1.0]
+  - aspect_ratio: [0.75, 1.5]
+    full_complement: false
+    max_keep: null
+    max_temporal_keep: 1.0
+    num_blocks: 2
+    spatial_scale: [0.7, 0.7]
+    temporal_scale: [1.0, 1.0]
+
+training:
+  batch_size: 24
+  num_workers: 8
+  max_epochs: 800
+  pin_memory: true
+  seed: 239
+  gradient_clip_val: 0
+  accumulate_grad_batches: 1
+  strategy: "ddp"
+  dtype: "bfloat16"
+
+optimizer:
+  type: "adamw"
+  lr: 5.25e-4
+  weight_decay: 0.04
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+  warmup_steps: 0
+
+optimization:
+  ema: [0.99925, 0.99925]
+  ipe: null
+  ipe_scale: 1.25
+
+loss:
+  loss_exp: 1.0
+
+checkpoint:
+  enable: true
+  dir: "./output/checkpoints"
+  prefix: "vjepa_vitl_"
+  save_top_k: 3
+  save_last: true
+  strict_top_k: false
+  monitor: "train_loss_epoch"
+  save_ckpt_freq: 50
+
+logging:
+  log_dir: "./output/logs"
+  log_freq: 10
