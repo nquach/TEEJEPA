@@ -75,14 +75,17 @@ class OptimizedVideoDatasetVJEPA(StreamingDataset):
     def __getitem__(self, idx):
         data = super().__getitem__(idx)
         video = data['video']
+        # Support both numpy and tensor from litdata
+        if isinstance(video, np.ndarray):
+            video = torch.from_numpy(video)
+        video = video.float()
         # Assume video shape (T, H, W, C) or (T, C, H, W)
         if video.shape[-1] == 3:
             # (T, H, W, C)
-            t, h, w, c = video.shape
+            pass
         else:
-            # (T, C, H, W) -> convert to (T, H, W, C) for consistent handling
-            t, c, h, w = video.shape
-            video = np.transpose(video, (0, 2, 3, 1))
+            # (T, C, H, W) -> (T, H, W, C)
+            video = video.permute(0, 2, 3, 1)
         num_frames = video.shape[0]
         max_start = num_frames - self.frames_to_sample
         if max_start <= 0:
@@ -91,11 +94,10 @@ class OptimizedVideoDatasetVJEPA(StreamingDataset):
             start_frame = random.randint(0, max_start)
         sampled = video[start_frame : start_frame + self.frames_to_sample]
         sampled = sampled[:: self.temporal_stride]
-        video_tensor = torch.from_numpy(sampled).float()
-        if video_tensor.max() > 1.0:
-            video_tensor = video_tensor / 255.0
+        if sampled.max() > 1.0:
+            sampled = sampled / 255.0
         # (T, H, W, C) -> (C, T, H, W)
-        video_tensor = video_tensor.permute(3, 0, 1, 2)
+        video_tensor = sampled.permute(3, 0, 1, 2)
         if self.custom_transform is not None:
             video_tensor = self.custom_transform(video_tensor)
         n = video_tensor.shape[1]
