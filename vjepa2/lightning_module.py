@@ -147,6 +147,15 @@ class VJEPALightningModule(pl.LightningModule):
         if self._optimizer is not None and hasattr(self._optimizer, 'train'):
             self._optimizer.train()
 
+    def optimizer_step(self, epoch, batch_idx, optimizer, optimizer_closure):
+        # Schedule-free: call .train() immediately before step() (required by schedule-free lib)
+        actual = optimizer
+        while hasattr(actual, 'optimizer'):
+            actual = actual.optimizer
+        if hasattr(actual, 'train'):
+            actual.train()
+        super().optimizer_step(epoch, batch_idx, optimizer, optimizer_closure)
+
     def configure_optimizers(self):
         opt_cfg = self.opt_config
         lr = opt_cfg.get('lr', 5.25e-4)
