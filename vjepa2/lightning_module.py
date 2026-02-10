@@ -136,11 +136,9 @@ class VJEPALightningModule(pl.LightningModule):
             self.mask_collator.step()
 
     def on_before_optimizer_step(self, optimizer):
-        actual = optimizer
-        if hasattr(optimizer, 'optimizer'):
-            actual = optimizer.optimizer
-        if hasattr(actual, 'train'):
-            actual.train()
+        # Schedule-free requires the optimizer to be in train mode before step()
+        if self._optimizer is not None and hasattr(self._optimizer, 'train'):
+            self._optimizer.train()
 
     def configure_optimizers(self):
         opt_cfg = self.opt_config
