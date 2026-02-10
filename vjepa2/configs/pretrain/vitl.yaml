@@ -37,7 +37,7 @@ model:
   wide_silu: true
   zero_init_mask_tokens: true
   use_sdpa: true
-  crop_size: 256
+  crop_size: 224
   patch_size: 16
 
 mask:
