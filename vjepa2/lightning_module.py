@@ -137,6 +137,13 @@ class VJEPALightningModule(pl.LightningModule):
 
     def on_before_optimizer_step(self, optimizer):
         # Schedule-free requires the optimizer to be in train mode before step()
+        # Unwrap to the actual optimizer that will be stepped (e.g. Lightning/AMP wrappers)
+        actual = optimizer
+        while hasattr(actual, 'optimizer'):
+            actual = actual.optimizer
+        if hasattr(actual, 'train'):
+            actual.train()
+        # Also ensure our stored reference is in train mode (same object in typical case)
         if self._optimizer is not None and hasattr(self._optimizer, 'train'):
             self._optimizer.train()
 

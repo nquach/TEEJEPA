@@ -64,11 +64,11 @@ training:
   seed: 239
   gradient_clip_val: 0
   accumulate_grad_batches: 1
-  strategy: "ddp"
+  strategy: "auto"
   dtype: "bfloat16"
 
 optimizer:
-  type: "adamw"
+  type: "radam"
   lr: 5.25e-4
   weight_decay: 0.04
   betas: [0.9, 0.999]
