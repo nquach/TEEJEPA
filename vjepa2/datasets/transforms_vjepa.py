@@ -49,8 +49,8 @@ class DataAugmentationForVJEPA:
         self.random_resize_scale = random_resize_scale
         self.random_horizontal_flip = random_horizontal_flip
         self.motion_shift = motion_shift
-        self.mean = torch.tensor(normalize_mean, dtype=torch.float32).view(1, 1, 1, 1)
-        self.std = torch.tensor(normalize_std, dtype=torch.float32).view(1, 1, 1, 1)
+        self.mean = torch.tensor(normalize_mean, dtype=torch.float32).view(-1, 1, 1, 1)
+        self.std = torch.tensor(normalize_std, dtype=torch.float32).view(-1, 1, 1, 1)
         self.spatial_transform = (
             video_transforms.random_resized_crop_with_shift
             if motion_shift

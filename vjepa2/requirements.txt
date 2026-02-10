@@ -25,4 +25,5 @@ ftfy
 jupyter
 pytorch-lightning>=2.0
 litdata
-schedule-free
+schedulefree
+zstd
