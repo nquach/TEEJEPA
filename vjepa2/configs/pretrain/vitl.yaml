@@ -57,9 +57,9 @@ mask:
     temporal_scale: [1.0, 1.0]
 
 training:
-  batch_size: 24
-  num_workers: 8
-  max_epochs: 800
+  batch_size: 64
+  num_workers: 14
+  max_epochs: 2
   pin_memory: true
   seed: 239
   gradient_clip_val: 0
