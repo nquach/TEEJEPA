@@ -117,7 +117,6 @@ class VideoDataModuleVJEPA(pl.LightningDataModule):
         return DataLoader(
             self.train_dataset,
             batch_size=batch_size,
-            shuffle=True,
             num_workers=self.training_config.get('num_workers', 8),
             pin_memory=self.training_config.get('pin_memory', True),
             collate_fn=self.mask_collator,
