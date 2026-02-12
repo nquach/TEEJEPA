@@ -74,10 +74,6 @@ class VJEPALightningModule(pl.LightningModule):
         self.ipe_scale = float(opt_training_cfg.get('ipe_scale', 1.25))
         self.opt_config = opt_cfg
         self._optimizer = None
-        # For Option B: log train_loss_epoch every N steps as running avg so save_top_k gets multiple values
-        self._save_every_n_steps = config.get('checkpoint', {}).get('save_every_n_steps')
-        self._train_loss_sum = 0.0
-        self._train_loss_count = 0
 
     def _to_device(self, x):
         if isinstance(x, torch.Tensor):
@@ -112,26 +108,6 @@ class VJEPALightningModule(pl.LightningModule):
 
         self.log('train_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
         self.log('train_loss_epoch', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
-        # Log running average every save_every_n_steps so ModelCheckpoint (save_top_k) sees multiple values
-        if self._save_every_n_steps is not None and self._save_every_n_steps > 0:
-            loss_val = loss.detach().float().item()
-            self._train_loss_sum += loss_val
-            self._train_loss_count += 1
-            if self.global_step > 0 and self.global_step % self._save_every_n_steps == 0:
-                running_avg = self._train_loss_sum / self._train_loss_count
-                self.log(
-                    'train_loss_epoch',
-                    running_avg,
-                    on_step=True,
-                    on_epoch=False,
-                    prog_bar=True,
-                    logger=True,
-                    sync_dist=True,
-                )
-                self._train_loss_sum = 0.0
-                self._train_loss_count = 0
-
         return loss
 
     def on_after_optimizer_step(self, optimizer):

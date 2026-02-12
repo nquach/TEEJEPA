@@ -66,21 +66,19 @@ def main():
         strict_top_k = checkpoint_config.get('strict_top_k', False)
         save_last = False if strict_top_k else checkpoint_config.get('save_last', True)
         every_n_epochs = checkpoint_config.get('save_ckpt_freq')
-        save_every_n_steps = checkpoint_config.get('save_every_n_steps')
         checkpoint_callback = ModelCheckpoint(
             monitor=checkpoint_config.get('monitor', 'train_loss_epoch'),
             dirpath=ckpt_dir,
-            filename=prefix + "-{epoch:02d}-{step:06d}-{train_loss_epoch:.4f}",
+            filename=prefix + "-{epoch:02d}-{train_loss_epoch:.4f}",
             mode='min',
             save_top_k=save_top_k,
             verbose=True,
             auto_insert_metric_name=False,
             every_n_epochs=every_n_epochs,
-            every_n_train_steps=save_every_n_steps,
             save_on_train_epoch_end=True,
             save_last=save_last,
         )
-        print(f"Checkpoint: dir={ckpt_dir}, prefix={prefix}, save_top_k={save_top_k}, save_last={save_last}, save_every_n_steps={save_every_n_steps}")
+        print(f"Checkpoint: dir={ckpt_dir}, prefix={prefix}, save_top_k={save_top_k}, save_last={save_last}")
 
     logging_config = config.get('logging', {})
     log_dir = logging_config.get('log_dir', './output/logs')
