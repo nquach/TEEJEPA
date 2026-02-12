@@ -111,10 +111,9 @@ class VJEPALightningModule(pl.LightningModule):
         loss = loss / n
 
         self.log('train_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True)
+        self.log('train_loss_epoch', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        # Log train_loss_epoch only once per step (Lightning forbids same key twice with different args).
-        # When save_every_n_steps is set: log running avg every N steps for checkpoint callback.
-        # Otherwise: log at epoch end only.
+        # Log running average every save_every_n_steps so ModelCheckpoint (save_top_k) sees multiple values
         if self._save_every_n_steps is not None and self._save_every_n_steps > 0:
             loss_val = loss.detach().float().item()
             self._train_loss_sum += loss_val
@@ -132,8 +131,6 @@ class VJEPALightningModule(pl.LightningModule):
                 )
                 self._train_loss_sum = 0.0
                 self._train_loss_count = 0
-        else:
-            self.log('train_loss_epoch', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
 
