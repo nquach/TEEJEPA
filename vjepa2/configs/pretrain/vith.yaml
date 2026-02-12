@@ -92,6 +92,7 @@ checkpoint:
   strict_top_k: false
   monitor: "train_loss_epoch"
   save_ckpt_freq: 50
+  # If not set, defaults to steps_per_epoch = len(dataset) // batch_size
   save_every_n_steps: 1000
 
 logging:

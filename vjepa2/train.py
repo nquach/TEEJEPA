@@ -46,6 +46,27 @@ def main():
     data_module.setup('fit')
     print(f"Training dataset size: {len(data_module.train_dataset)}")
 
+    # Compute default save_every_n_steps = steps_per_epoch if not set in config
+    checkpoint_config = config.get('checkpoint', {})
+    training_config = config.get('training', {})
+    save_every_n_steps = checkpoint_config.get('save_every_n_steps')
+    if save_every_n_steps is None:
+        try:
+            dataset_size = len(data_module.train_dataset)
+            batch_size = training_config.get('batch_size', 24)
+            if dataset_size > 0 and batch_size > 0:
+                steps_per_epoch = dataset_size // batch_size
+                if steps_per_epoch > 0:
+                    save_every_n_steps = steps_per_epoch
+                    config['checkpoint']['save_every_n_steps'] = save_every_n_steps
+                    print(f"save_every_n_steps not set in config, defaulting to steps_per_epoch={steps_per_epoch} (dataset_size={dataset_size}, batch_size={batch_size})")
+                else:
+                    print("Warning: steps_per_epoch is 0, skipping step-based checkpointing")
+            else:
+                print(f"Warning: Cannot compute steps_per_epoch (dataset_size={dataset_size}, batch_size={batch_size}), skipping step-based checkpointing")
+        except (TypeError, AttributeError) as e:
+            print(f"Warning: Dataset does not support len() or error accessing size: {e}. Skipping step-based checkpointing default.")
+
     mask_collator = data_module.get_mask_collator()
     print("Creating Lightning model...")
     model = VJEPALightningModule(config, mask_collator=mask_collator)
@@ -66,7 +87,7 @@ def main():
         strict_top_k = checkpoint_config.get('strict_top_k', False)
         save_last = False if strict_top_k else checkpoint_config.get('save_last', True)
         every_n_epochs = checkpoint_config.get('save_ckpt_freq')
-        save_every_n_steps = checkpoint_config.get('save_every_n_steps')
+        # save_every_n_steps already computed above (or read from config if set)
         checkpoint_callback = ModelCheckpoint(
             monitor=checkpoint_config.get('monitor', 'train_loss_epoch'),
             dirpath=ckpt_dir,
@@ -90,7 +111,7 @@ def main():
 
     callbacks = [c for c in [checkpoint_callback] if c is not None]
 
-    training_config = config.get('training', {})
+    # training_config already accessed above for save_every_n_steps computation
     dtype = (training_config.get('dtype') or 'float32').lower()
     if dtype == 'bfloat16':
         precision = 'bf16-mixed'
