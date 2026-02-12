@@ -93,9 +93,10 @@ checkpoint:
   monitor: "train_loss_epoch"
   save_ckpt_freq: 50
   # Save and log train_loss_epoch every N steps (enables save_top_k with streaming data)
-  # If not set, defaults to steps_per_epoch_per_gpu = (len(dataset) // batch_size) // num_gpus
-  # This ensures checkpoints are saved approximately once per epoch per GPU.
-  save_every_n_steps: null
+  # If not set, defaults to steps_per_epoch = len(dataset) // batch_size
+  # Note: With distributed training (DDP), this is per-GPU steps, so each GPU saves
+  # more frequently than once per epoch. Override in config if needed.
+  save_every_n_steps: 1000
 
 logging:
   log_dir: "./output/logs"

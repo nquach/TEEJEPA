@@ -46,7 +46,7 @@ def main():
     data_module.setup('fit')
     print(f"Training dataset size: {len(data_module.train_dataset)}")
 
-    # Compute default save_every_n_steps = steps_per_epoch_per_gpu if not set in config
+    # Compute default save_every_n_steps = steps_per_epoch if not set in config
     checkpoint_config = config.get('checkpoint', {})
     training_config = config.get('training', {})
     save_every_n_steps = checkpoint_config.get('save_every_n_steps')
@@ -54,16 +54,14 @@ def main():
         try:
             dataset_size = len(data_module.train_dataset)
             batch_size = training_config.get('batch_size', 24)
-            num_gpus = max(1, torch.cuda.device_count())  # Use at least 1 to avoid division by zero
             if dataset_size > 0 and batch_size > 0:
                 steps_per_epoch = dataset_size // batch_size
-                steps_per_epoch_per_gpu = steps_per_epoch // num_gpus
-                if steps_per_epoch_per_gpu > 0:
-                    save_every_n_steps = steps_per_epoch_per_gpu
+                if steps_per_epoch > 0:
+                    save_every_n_steps = steps_per_epoch
                     config['checkpoint']['save_every_n_steps'] = save_every_n_steps
-                    print(f"save_every_n_steps not set in config, defaulting to steps_per_epoch_per_gpu={steps_per_epoch_per_gpu} (dataset_size={dataset_size}, batch_size={batch_size}, num_gpus={num_gpus})")
+                    print(f"save_every_n_steps not set in config, defaulting to steps_per_epoch={steps_per_epoch} (dataset_size={dataset_size}, batch_size={batch_size})")
                 else:
-                    print(f"Warning: steps_per_epoch_per_gpu is 0 (steps_per_epoch={steps_per_epoch}, num_gpus={num_gpus}), skipping step-based checkpointing")
+                    print("Warning: steps_per_epoch is 0, skipping step-based checkpointing")
             else:
                 print(f"Warning: Cannot compute steps_per_epoch (dataset_size={dataset_size}, batch_size={batch_size}), skipping step-based checkpointing")
         except (TypeError, AttributeError) as e:
